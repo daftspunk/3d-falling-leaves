@@ -10,8 +10,7 @@
  * - rotate3Di plugin (rotate3Di.min.js)
  */
 
-+function ($) { "use strict";
-
+(function( $, document ){  "use strict";
     // Params
     var Ypos = [],
         Xpos = [],
@@ -23,25 +22,26 @@
         height = [],
         width = [],
         counter = 0,
-        opacityLeaf = []
+        opacityLeaf = [];
 
     // OCTOBER LEAVES CLASS DEFINITION
     // ============================
 
     var OctoberLeaves = function(element, options) {
-        var self       = this
-        this.options   = options
-        this.$el       = $(element)
+        var self       = this;
+        this.options   = options;
+        this.$el       = $(element);
 
-        this.timer = null
-        this.winWidth = $(window).width()
-        this.winHeight = $(window).height()
+        this.timer = null;
+        this.winWidth = $(window).width();
+        this.winHeight = $(window).height();
 
         // Init
-        this.start()
-    }
+        this.start();
+    };
 
     OctoberLeaves.DEFAULTS = {
+        target : 'body',
         leafStyles: 3,      // Number of leaf styles in the sprite (leaves.png)
         speedC: 2,          // Speed of leaves
         rotation: 1,        // Define rotation of leaves
@@ -49,11 +49,12 @@
         numberOfLeaves: 15, // Number of leaves
         size: 40,           // General size of leaves, final size is calculated randomly (with this number as general parameter)
         cycleSpeed: 30      // Animation speed (Inverse frames per second) (10-100)
-    }
+    };
 
     OctoberLeaves.prototype.start = function() {
-        if (this.timer !== null)
-            return
+        if (this.timer !== null){
+            return;
+        }
 
         for (var i = 0 ;i < this.options.numberOfLeaves;i++){
 
@@ -63,8 +64,9 @@
             // Random width and height according to chosen parameter
             width[i] = Math.round(Math.random() * this.options.size + 20);
             height[i] = Math.round(Math.random() * this.options.size + 20);
-            if (width[i] > height[i] *1.5 || height[i] > width[i] * 1.5)
+            if (width[i] > height[i] *1.5 || height[i] > width[i] * 1.5) {
                 width[i] = height[i];
+            }
 
             // Starting y position of leaves
             Ypos[i] = -Math.random() * 500 - 40;
@@ -93,32 +95,33 @@
                     opacity: opacityLeaf[i],
                     backgroundSize: width[i] + 'px ' + (height[i] * this.options.leafStyles) + 'px',
                     backgroundPosition: '0 ' + height[i] * (randomLeaf - 1) + 'px'
-                })
+                });
 
-            $('body').append(img)
+            $( OctoberLeaves.DEFAULTS.target ).append(img);
         }
 
-        this.timer = setInterval($.proxy(this.leafCycle, this), this.options.cycleSpeed)
-    }
+        this.timer = setInterval($.proxy(this.leafCycle, this), this.options.cycleSpeed);
+    };
 
     OctoberLeaves.prototype.stop = function() {
         if (this.timer) {
-            clearInterval(this.timer)
-            this.timer = null
+            clearInterval(this.timer);
+            this.timer = null;
 
             // Destroy all the leaves
-            $('.october-leaf').fadeOut(500, function(){
-                $(this).remove()
-            })
+            $('.october-leaf', OctoberLeaves.DEFAULTS.target).fadeOut(500, function(){
+                $(this).remove();
+            });
         }
-    }
+    };
 
     OctoberLeaves.prototype.leafCycle = function() {
         for (var i = 0; i < this.options.numberOfLeaves; i++) {
 
             // Strafe
             var strafeY = Speed[i] * Math.sin(90 * Math.PI / 180),
-                strafeX = Speed[i] * Math.cos(CStrafe[i]);
+                strafeX = Speed[i] * Math.cos(CStrafe[i]),
+                leaf = $('#octoberLeaf'+i);
 
             rotationAll[i] += this.options.rotation + Speed[i];
             Ypos[i] += strafeY;
@@ -127,13 +130,13 @@
             // Opacity
             if (Ypos[i] < 0){
                 opacityLeaf[i] = 1;
-                $('#octoberLeaf'+i).css({opacity:opacityLeaf[i]});
+                leaf.css({opacity:opacityLeaf[i]});
             }
 
             // Leaves slowly disappearing at the end of browser window
             if (Ypos[i] > this.winHeight - height[i] * 4){
                 opacityLeaf[i] -= 0.05;
-                $('#octoberLeaf' + i).css({opacity:opacityLeaf[i]});
+                laef.css({opacity:opacityLeaf[i]});
             }
 
             // When leaves reach certain browser height they are transported back to the begining
@@ -144,45 +147,47 @@
             }
 
             // Rotation is applied or not
-            if (this.options.rotationTrue == 1){
-                $('#octoberLeaf'+i).css({top: Ypos[i], left: Xpos[i]});
-                $('#octoberLeaf'+i).rotate3Di(rotationAll[i], 0);
-            }
-            else if (this.options.rotationTrue == 0){
-                $('#octoberLeaf'+i).css({top: Ypos[i], left: Xpos[i]});
+            if (this.options.rotationTrue == 1) {
+                leaf.css({top: Ypos[i], left: Xpos[i]});
+                leaf.rotate3Di(rotationAll[i], 0);
+            } else if (this.options.rotationTrue === 0) {
+                leaf.css({top: Ypos[i], left: Xpos[i]});
             }
 
             CStrafe[i] += Strafe[i];
         }
-    }
+    };
 
     // OCTOBER LEAVES PLUGIN DEFINITION
     // ============================
 
-    var old = $.fn.octoberLeaves
+    var old = $.fn.octoberLeaves;
 
     $.fn.octoberLeaves = function (option) {
-        var args = Array.prototype.slice.call(arguments, 1)
+        var args = Array.prototype.slice.call(arguments, 1);
         return this.each(function () {
-            var $this   = $(this)
-            var data    = $this.data('oc.leaves')
-            var options = $.extend({}, OctoberLeaves.DEFAULTS, $this.data(), typeof option == 'object' && option)
-            if (!data) $this.data('oc.leaves', (data = new OctoberLeaves(this, options)))
-            else if (typeof option == 'string') data[option].apply(data, args)
-        })
-    }
+            var $this   = $(this);
+            var data    = $this.data('oc.leaves');
+            var options = $.extend({}, OctoberLeaves.DEFAULTS, $this.data(), typeof option == 'object' && option);
+            if (!data) {
+                $this.data('oc.leaves', (data = new OctoberLeaves(this, options)));
+            } else if (typeof option == 'string'){
+                data[option].apply(data, args);
+            }
+        });
+    };
 
-    $.fn.octoberLeaves.Constructor = OctoberLeaves
+    $.fn.octoberLeaves.Constructor = OctoberLeaves;
 
     // OCTOBER LEAVES NO CONFLICT
     // =================
 
     $.fn.octoberLeaves.noConflict = function () {
-        $.fn.octoberLeaves = old
-        return this
-    }
+        $.fn.octoberLeaves = old;
+        return this;
+    };
 
     // OCTOBER LEAVES DATA-API
     // ===============
 
-}(window.jQuery);
+}( jQuery, document ) );
