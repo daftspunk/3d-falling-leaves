@@ -24,6 +24,7 @@
         counter = 0,
         opacityLeaf = [];
 
+
     // OCTOBER LEAVES CLASS DEFINITION
     // ============================
 
@@ -33,15 +34,21 @@
         this.$el       = $(element);
 
         this.timer = null;
-        this.winWidth = $(window).width();
-        this.winHeight = $(window).height();
+
+        if( this.$el[0] == document || this.$el[0].tagName.toLowerCase() == 'body' ){
+            this.winWidth = $(window).width();
+            this.winHeight = $(window).height();
+            this.$el = 'body';
+        } else {
+            this.winWidth = $( this.$el ).width();
+            this.winHeight = $( this.$el ).height();
+        }
 
         // Init
         this.start();
     };
 
     OctoberLeaves.DEFAULTS = {
-        target : 'body',
         leafStyles: 3,      // Number of leaf styles in the sprite (leaves.png)
         speedC: 2,          // Speed of leaves
         rotation: 1,        // Define rotation of leaves
@@ -85,8 +92,9 @@
             // Strength of right/left strafe
             Strafe[i] = Math.random() * 0.06 + 0.05;
 
-            var img = $('<div />').attr('id', 'octoberLeaf'+i)
+            var img = $('<div />')
                 .addClass('october-leaf leaf-style'+randomLeaf)
+                .addClass('octoberLeaf'+i)
                 .css({
                     top: Ypos[i],
                     left: Xpos[i],
@@ -97,7 +105,7 @@
                     backgroundPosition: '0 ' + height[i] * (randomLeaf - 1) + 'px'
                 });
 
-            $( OctoberLeaves.DEFAULTS.target ).append(img);
+            $( this.$el ).append(img);
         }
 
         this.timer = setInterval($.proxy(this.leafCycle, this), this.options.cycleSpeed);
@@ -109,7 +117,7 @@
             this.timer = null;
 
             // Destroy all the leaves
-            $('.october-leaf', OctoberLeaves.DEFAULTS.target).fadeOut(500, function(){
+            $('.october-leaf', this.$el).fadeOut(500, function(){
                 $(this).remove();
             });
         }
@@ -121,7 +129,7 @@
             // Strafe
             var strafeY = Speed[i] * Math.sin(90 * Math.PI / 180),
                 strafeX = Speed[i] * Math.cos(CStrafe[i]),
-                leaf = $('#octoberLeaf'+i);
+                leaf = $('.octoberLeaf'+i, this.$el);
 
             rotationAll[i] += this.options.rotation + Speed[i];
             Ypos[i] += strafeY;
@@ -136,7 +144,7 @@
             // Leaves slowly disappearing at the end of browser window
             if (Ypos[i] > this.winHeight - height[i] * 4){
                 opacityLeaf[i] -= 0.05;
-                laef.css({opacity:opacityLeaf[i]});
+                leaf.css({opacity:opacityLeaf[i]});
             }
 
             // When leaves reach certain browser height they are transported back to the begining
@@ -169,6 +177,7 @@
             var $this   = $(this);
             var data    = $this.data('oc.leaves');
             var options = $.extend({}, OctoberLeaves.DEFAULTS, $this.data(), typeof option == 'object' && option);
+
             if (!data) {
                 $this.data('oc.leaves', (data = new OctoberLeaves(this, options)));
             } else if (typeof option == 'string'){
