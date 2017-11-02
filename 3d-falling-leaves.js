@@ -34,8 +34,8 @@
         this.$el       = $(element)
 
         this.timer = null
-        this.winWidth = $(window).width()
-        this.winHeight = $(window).height()
+        this.winWidth = $(this.$el).width()
+        this.winHeight = $(this.$el).height()
 
         // Init
         this.start()
