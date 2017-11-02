@@ -95,7 +95,7 @@
                     backgroundPosition: '0 ' + height[i] * (randomLeaf - 1) + 'px'
                 })
 
-            $('body').append(img)
+            $(this.$el).append(img)
         }
 
         this.timer = setInterval($.proxy(this.leafCycle, this), this.options.cycleSpeed)
